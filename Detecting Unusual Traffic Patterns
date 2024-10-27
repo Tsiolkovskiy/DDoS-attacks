@@ -1,0 +1,40 @@
+import time
+from collections import deque
+from datetime import datetime, timedelta
+
+# Configuration
+THRESHOLD = 100  # Set the threshold for requests per minute
+CHECK_INTERVAL = 60  # in seconds
+
+# Store timestamps of requests in a deque for efficient sliding window
+request_log = deque()
+
+# Function to simulate an incoming request
+def log_request():
+    current_time = datetime.now()
+    request_log.append(current_time)
+    print(f"Request logged at {current_time}")
+
+# Function to check if traffic exceeds threshold
+def check_for_ddos():
+    current_time = datetime.now()
+    # Remove timestamps outside the interval
+    while request_log and request_log[0] < current_time - timedelta(seconds=CHECK_INTERVAL):
+        request_log.popleft()
+    
+    # Check the size of the request log to see if it exceeds the threshold
+    if len(request_log) > THRESHOLD:
+        print("ALERT: Unusual traffic pattern detected! Possible DDoS attack.")
+    else:
+        print("Traffic levels normal.")
+
+# Simulate incoming traffic
+def simulate_traffic(requests_per_minute):
+    interval = 60 / requests_per_minute  # interval between requests
+    try:
+        while True:
+            log_request()         # Log each incoming request
+            check_for_ddos()      # Check for unusual traffic
+            time.sleep(interval)  # Wait before logging the next request
+    except KeyboardInterrupt:
+        print("Simulation stopped.")
